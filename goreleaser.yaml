@@ -1,0 +1,66 @@
+project_name: suvctl
+
+dist: .builds
+
+builds:
+  - main: ./
+    binary: suvctl
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X github.com/patitolabs/suvctl/cmd.version={{.Version}} -X github.com/patitolabs/suvctl/cmd.commit={{.Commit}} -X github.com/patitolabs/suvctl/cmd.buildDate={{.Date}} -X github.com/patitolabs/suvctl/cmd.platform={{.Os}}/{{.Arch}}
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+      - openbsd
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    ignore:
+      - goos: windows
+        goarch: arm
+    goarm:
+      - "6"
+      - "7"
+    goamd64:
+      - v1
+      - v2
+      - v3
+
+archives:
+  - format: zip
+    files:
+      - LICENSE*
+      - CHANGELOG*
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+
+nfpms:
+  - id: default
+    package_name: suvctl
+    vendor: PatitoLabs
+    license: MIT
+    maintainer: Nícolas Castillo <ncastillo@patito.digital>
+    description: A command-line tool for SUV2 at National University of Trujillo
+    homepage: https://github.com/patitolabs/suvctl
+    formats:
+      - deb
+      - rpm
+      - apk
+      - termux.deb
+      - archlinux
+    rpm:
+      summary: A command-line tool for SUV2 at National University of Trujillo
+      compression: lzma
+    archlinux:
+      pkgbase: suvctl
+      packager: Nícolas Castillo <ncastillo@patito.digital>
+    provides:
+      - suvctl
