@@ -10,8 +10,16 @@ var gradesCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(gradesCmd)
+
+	gradesCmd.Flags().StringArrayP("courseid", "i", []string{}, "Filter by course ID")
 }
 
 func grades(cmd *cobra.Command, args []string) {
-	c.ListGrades()
+	if len(args) > 0 {
+		c.ListGrades()
+	} else {
+		if courseId, err := cmd.Flags().GetStringArray("courseid"); err == nil {
+			c.ListGradesByCourseId(courseId)
+		}
+	}
 }

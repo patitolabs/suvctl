@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/patitolabs/gosuv2"
@@ -15,6 +16,30 @@ func (c *Client) ListGrades() {
 	for _, grade := range suvGradesResponse.Courses {
 		prettyPrintGradeCourse(grade)
 		fmt.Println()
+	}
+}
+
+func (c *Client) ListGradesByCourseId(courseId []string) {
+	suvGradesResponse, err := c.SuvClient.GetSuvGradesResponse()
+	cobra.CheckErr(err)
+
+	courseIdMap := make(map[string]struct{})
+	for _, id := range courseId {
+		courseIdMap[id] = struct{}{}
+	}
+
+	found := false
+	for _, grade := range suvGradesResponse.Courses {
+		if _, exists := courseIdMap[grade.IdCurso]; exists {
+			prettyPrintGradeCourse(grade)
+			fmt.Println()
+			found = true
+		}
+	}
+
+	if !found {
+		fmt.Println("No courses found.")
+		os.Exit(1)
 	}
 }
 
