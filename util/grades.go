@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/patitolabs/gosuv2"
 	"github.com/spf13/cobra"
@@ -34,6 +35,28 @@ func (c *Client) ListGradesByCourseId(courseId []string) {
 			prettyPrintGradeCourse(grade)
 			fmt.Println()
 			found = true
+		}
+	}
+
+	if !found {
+		fmt.Println("No courses found.")
+		os.Exit(1)
+	}
+}
+
+func (c *Client) ListGradesByCourseName(courseName []string) {
+	suvGradesResponse, err := c.SuvClient.GetSuvGradesResponse()
+	cobra.CheckErr(err)
+
+	found := false
+	for _, grade := range suvGradesResponse.Courses {
+		for _, name := range courseName {
+			if strings.Contains(grade.Curso, name) {
+				prettyPrintGradeCourse(grade)
+				fmt.Println()
+				found = true
+				break
+			}
 		}
 	}
 
