@@ -30,7 +30,7 @@ func Execute() error {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "f", "", "config file (default is $HOME/.config/suvctl/suvctl.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "f", "", "config file (default is $HOME/.config/suvctl/config.yml)")
 	rootCmd.PersistentFlags().StringP("host", "U", "", "SUV host FQDN (default is suv2.unitru.edu.pe)")
 	rootCmd.PersistentFlags().StringP("session", "S", "", "session for SUV operations")
 	rootCmd.PersistentFlags().BoolP("detailed", "d", false, "show detailed information")
@@ -50,7 +50,7 @@ func initConfig() {
 
 		viper.AddConfigPath(configPath)
 
-		viper.SetConfigName("suvctl")
+		viper.SetConfigName("config")
 		viper.SetConfigType("yaml")
 		viper.SetConfigType("yml")
 
