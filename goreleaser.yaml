@@ -10,6 +10,7 @@ builds:
     ldflags:
       - -s -w -X github.com/patitolabs/suvctl/cmd.version={{.Version}} -X github.com/patitolabs/suvctl/cmd.commit={{.Commit}} -X github.com/patitolabs/suvctl/cmd.buildDate={{.Date}} -X github.com/patitolabs/suvctl/cmd.platform={{.Os}}/{{.Arch}}
     goos:
+      - android
       - linux
       - darwin
       - windows
