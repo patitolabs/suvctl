@@ -1,6 +1,7 @@
 # suvctl
 
 [![goreleaser](https://github.com/patitolabs/suvctl/actions/workflows/release.yaml/badge.svg)](https://github.com/patitolabs/suvctl/actions/workflows/release.yaml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=patitolabs_gosuv2&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=patitolabs_gosuv2)
 
 A command-line tool for SUV2 at National University of Trujillo, built with gosuv2
 
