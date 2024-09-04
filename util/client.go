@@ -13,6 +13,7 @@ type Client struct {
 func ReadConfig() *gosuv2.SuvConfig {
 	return &gosuv2.SuvConfig{
 		Host:       viper.GetString("host"),
+		Path:       viper.GetString("path"),
 		PhpSession: viper.GetString("session"),
 		Detailed:   viper.GetBool("detailed"),
 	}
