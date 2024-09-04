@@ -70,39 +70,31 @@ func prettyPrintGradeCourse(grade gosuv2.SuvCurrentCourseGrades) {
 	fmt.Println("Course ID:", grade.IdCurso)
 	fmt.Println("Course:", grade.Curso)
 	fmt.Println("Time:", grade.Vez)
-	if grade.Promedio1 != "" {
-		parseAndPrintGrade(grade.Promedio1, "Average of Unit 1:")
-	}
-	if grade.Promedio2 != "" {
-		parseAndPrintGrade(grade.Promedio2, "Average of Unit 2:")
-	}
-	if grade.Promedio3 != "" {
-		parseAndPrintGrade(grade.Promedio3, "Average of Unit 3:")
-	}
-	if grade.Promedio4 != "" {
-		parseAndPrintGrade(grade.Promedio4, "Average of Unit 4:")
-	}
-	if grade.Promedio5 != "" {
-		parseAndPrintGrade(grade.Promedio5, "Average of Unit 5:")
-	}
-	if grade.Promedio6 != "" {
-		parseAndPrintGrade(grade.Promedio6, "Average of Unit 6:")
-	}
-	if grade.Sustitutorio != "" {
-		parseAndPrintGrade(grade.Sustitutorio, "Substitute exam:")
-	}
-	if grade.Promedio != "" {
-		parseAndPrintGrade(grade.Promedio, "Course Average:")
-	}
-	if grade.Aplazado != "" {
-		parseAndPrintGrade(grade.Aplazado, "Failed:")
-	}
-	if grade.PromedioFinal != "" {
-		parseAndPrintGrade(grade.PromedioFinal, "Course Final Average:")
-	}
+	printAverage(grade.Promedio1, "Average of Unit 1:")
+	printAverage(grade.Promedio2, "Average of Unit 2:")
+	printAverage(grade.Promedio3, "Average of Unit 3:")
+	printAverage(grade.Promedio4, "Average of Unit 4:")
+	printAverage(grade.Promedio5, "Average of Unit 5:")
+	printAverage(grade.Promedio6, "Average of Unit 6:")
+	printAverage(grade.Sustitutorio, "Substitute exam:")
+	printAverage(grade.Promedio, "Course Average:")
+	printAverage(grade.Aplazado, "Failed:")
+	printAverage(grade.PromedioFinal, "Course Final Average:")
+
 	if grade.Inhabilitado != "0" {
 		fmt.Println("\033[31mWarning: the student was disqualified in this course\033[0m")
 	}
+
+	printFinalStatus(grade)
+}
+
+func printAverage(gradeStr string, message string) {
+	if gradeStr != "" {
+		parseAndPrintGrade(gradeStr, message)
+	}
+}
+
+func printFinalStatus(grade gosuv2.SuvCurrentCourseGrades) {
 	if grade.EstadoFinal == "1" {
 		// Print the final status in green
 		fmt.Println("Final status: \033[32mPASSED\033[0m")
