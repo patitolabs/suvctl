@@ -3,8 +3,8 @@ module github.com/patitolabs/suvctl
 go 1.23
 
 require (
-	github.com/adrg/xdg v0.5.1
-	github.com/patitolabs/gosuv2 v0.0.2-alpha
+	github.com/adrg/xdg v0.5.2
+	github.com/patitolabs/gosuv2 v0.0.3-alpha
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 )
@@ -24,9 +24,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/exp v0.0.0-20240823005443-9b4947da3948 // indirect
+	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c // indirect
 	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

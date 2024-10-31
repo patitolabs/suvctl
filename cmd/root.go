@@ -32,7 +32,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "f", "", "config file (default is $HOME/.config/suvctl/config.yml)")
 	rootCmd.PersistentFlags().StringP("host", "H", "", "SUV host FQDN (default is suv2.unitru.edu.pe)")
-	rootCmd.PersistentFlags().StringP("path", "P", "", "SUV path (default is /portal)")
+	rootCmd.PersistentFlags().StringP("path", "P", "", "SUV path (default is empty)")
 	rootCmd.PersistentFlags().StringP("session", "S", "", "session for SUV operations")
 	rootCmd.PersistentFlags().BoolP("detailed", "d", false, "show detailed information")
 	rootCmd.PersistentFlags().BoolP("version", "v", false, "show version information")
@@ -56,7 +56,7 @@ func initConfig() {
 		viper.SetConfigType("yml")
 
 		viper.SetDefault("host", "suv2.unitru.edu.pe")
-		viper.SetDefault("path", "/portal")
+		viper.SetDefault("path", "")
 	}
 
 	err := viper.ReadInConfig()
