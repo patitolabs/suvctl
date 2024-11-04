@@ -3,7 +3,7 @@ module github.com/patitolabs/suvctl
 go 1.23
 
 require (
-	github.com/adrg/xdg v0.5.2
+	github.com/adrg/xdg v0.5.3
 	github.com/patitolabs/gosuv2 v0.0.3-alpha
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
