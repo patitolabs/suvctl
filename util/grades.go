@@ -110,13 +110,18 @@ func printGrade(grade float32, message string) {
 }
 
 func printFinalStatus(grade gosuv2.SuvCurrentCourseGrades) {
-	if grade.FinalStatus == 1 {
+	if grade.FinalStatus == gosuv2.PassedStatus {
 		// Print the final status in green
 		fmt.Println("Final status: \033[32mPASSED\033[0m")
 	} else {
 		if grade.Average1 != 0 && grade.Average2 != 0 && grade.Average3 != 0 {
-			// Print the final status in red
-			fmt.Println("Final status: \033[31mFAILED\033[0m")
+			if grade.Average >= 14 || grade.FinalAverage >= 14 {
+				// Print the final status in green, student passed
+				fmt.Println("Final status: \033[32mPASSED\033[0m")
+			} else {
+				// Print the final status in red, student failed
+				fmt.Println("Final status: \033[31mFAILED\033[0m")
+			}
 		} else {
 			// Print the final status in yellow, semester isn't over yet
 			fmt.Println("Final status: \033[33mPENDING\033[0m")
