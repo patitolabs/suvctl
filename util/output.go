@@ -14,19 +14,22 @@ import (
 type OutputFormat string
 
 const (
-	OutputDefault OutputFormat = "default"
-	OutputTable   OutputFormat = "table"
-	OutputJSON    OutputFormat = "json"
+	OutputText  OutputFormat = "text"
+	OutputTable OutputFormat = "table"
+	OutputJSON  OutputFormat = "json"
+	OutputRaw   OutputFormat = "raw"
 )
 
 // GetOutputFormat returns the current output format from viper config
 func GetOutputFormat() OutputFormat {
 	format := viper.GetString("output")
 	switch format {
-	case "default":
-		return OutputDefault
+	case "text":
+		return OutputText
 	case "json":
 		return OutputJSON
+	case "raw":
+		return OutputRaw
 	default:
 		return OutputTable
 	}
@@ -72,10 +75,12 @@ func OutputGrades(grades []gosuv2.SuvCurrentCourseGrades) {
 	switch format {
 	case OutputJSON:
 		outputGradesJSON(grades)
+	case OutputRaw:
+		outputGradesRaw(grades)
 	case OutputTable:
 		outputGradesTable(grades)
 	default:
-		outputGradesDefault(grades)
+		outputGradesText(grades)
 	}
 }
 
@@ -85,10 +90,12 @@ func OutputStudents(students []gosuv2.StudentBasicResponse) {
 	switch format {
 	case OutputJSON:
 		outputStudentsJSON(students)
+	case OutputRaw:
+		outputStudentsRaw(students)
 	case OutputTable:
 		outputStudentsTable(students)
 	default:
-		outputStudentsDefault(students)
+		outputStudentsText(students)
 	}
 }
 
@@ -98,10 +105,12 @@ func OutputProfessors(professors []gosuv2.ProfessorBasicResponse) {
 	switch format {
 	case OutputJSON:
 		outputProfessorsJSON(professors)
+	case OutputRaw:
+		outputProfessorsRaw(professors)
 	case OutputTable:
 		outputProfessorsTable(professors)
 	default:
-		outputProfessorsDefault(professors)
+		outputProfessorsText(professors)
 	}
 }
 
@@ -407,20 +416,44 @@ func outputStudentsTable(students []gosuv2.StudentBasicResponse) {
 		return
 	}
 
-	fmt.Println("Students found:")
-	fmt.Println("╭─────────────┬────────────────────────────────────┬─────────────╮")
-	fmt.Println("│ Student ID  │ Student Name                       │     DNI     │")
-	fmt.Println("├─────────────┼────────────────────────────────────┼─────────────┤")
-
-	for _, student := range students {
-		studentName := student.StudentName
-		if len(studentName) > 34 {
-			studentName = studentName[:31] + "..."
-		}
-		fmt.Printf("│ %-11s │ %-34s │ %-11s │\n", student.StudentID, studentName, student.DNI)
+	// Calculate column widths based on content
+	columns := []Column{
+		{"Student ID", 13, "left", true},
+		{"Student Name", 36, "left", true},
+		{"DNI", 13, "left", true},
 	}
 
-	fmt.Println("╰─────────────┴────────────────────────────────────┴─────────────╯")
+	// Adjust column widths based on actual content
+	maxIDLen := len("Student ID")
+	maxNameLen := len("Student Name")
+	maxDNILen := len("DNI")
+
+	for _, student := range students {
+		if len(student.StudentID) > maxIDLen {
+			maxIDLen = len(student.StudentID)
+		}
+		if len(student.StudentName) > maxNameLen {
+			maxNameLen = len(student.StudentName)
+		}
+		if len(student.DNI) > maxDNILen {
+			maxDNILen = len(student.DNI)
+		}
+	}
+
+	// Apply minimum widths and padding
+	columns[0].Width = max(maxIDLen+2, 13)
+	columns[1].Width = max(maxNameLen+2, 36)
+	columns[2].Width = max(maxDNILen+2, 13)
+
+	fmt.Println("Students found:")
+	printTableHeader(columns)
+	printTableSeparator(columns)
+
+	for _, student := range students {
+		printStudentTableRow(student, columns)
+	}
+
+	printTableFooter(columns)
 }
 
 func outputProfessorsJSON(professors []gosuv2.ProfessorBasicResponse) {
@@ -449,31 +482,61 @@ func outputProfessorsTable(professors []gosuv2.ProfessorBasicResponse) {
 		return
 	}
 
-	fmt.Println("Professors found:")
-	fmt.Println("╭─────────────┬────────────────────────────────────┬─────────────┬─────────────╮")
-	fmt.Println("│    Code     │ Professor Name                     │     DNI     │  Worker ID  │")
-	fmt.Println("├─────────────┼────────────────────────────────────┼─────────────┼─────────────┤")
-
-	for _, professor := range professors {
-		professorName := professor.ProfessorName
-		if len(professorName) > 34 {
-			professorName = professorName[:31] + "..."
-		}
-		fmt.Printf("│ %-11s │ %-34s │ %-11s │ %-11s │\n", professor.Code, professorName, professor.DNI, professor.WorkerID)
+	// Calculate column widths based on content
+	columns := []Column{
+		{"Code", 13, "left", true},
+		{"Professor Name", 36, "left", true},
+		{"DNI", 13, "left", true},
+		{"Worker ID", 13, "left", true},
 	}
 
-	fmt.Println("╰─────────────┴────────────────────────────────────┴─────────────┴─────────────╯")
+	// Adjust column widths based on actual content
+	maxCodeLen := len("Code")
+	maxNameLen := len("Professor Name")
+	maxDNILen := len("DNI")
+	maxWorkerLen := len("Worker ID")
+
+	for _, professor := range professors {
+		if len(professor.Code) > maxCodeLen {
+			maxCodeLen = len(professor.Code)
+		}
+		if len(professor.ProfessorName) > maxNameLen {
+			maxNameLen = len(professor.ProfessorName)
+		}
+		if len(professor.DNI) > maxDNILen {
+			maxDNILen = len(professor.DNI)
+		}
+		if len(professor.WorkerID) > maxWorkerLen {
+			maxWorkerLen = len(professor.WorkerID)
+		}
+	}
+
+	// Apply minimum widths and padding
+	columns[0].Width = max(maxCodeLen+2, 13)
+	columns[1].Width = max(maxNameLen+2, 36)
+	columns[2].Width = max(maxDNILen+2, 13)
+	columns[3].Width = max(maxWorkerLen+2, 13)
+
+	fmt.Println("Professors found:")
+	printTableHeader(columns)
+	printTableSeparator(columns)
+
+	for _, professor := range professors {
+		printProfessorTableRow(professor, columns)
+	}
+
+	printTableFooter(columns)
 }
 
-// Default output functions (existing behavior)
-func outputGradesDefault(grades []gosuv2.SuvCurrentCourseGrades) {
+// Text output functions (existing behavior)
+func outputGradesText(grades []gosuv2.SuvCurrentCourseGrades) {
 	for _, grade := range grades {
 		prettyPrintGradeCourse(grade)
 		fmt.Println()
 	}
 }
 
-func outputStudentsDefault(students []gosuv2.StudentBasicResponse) {
+func outputStudentsText(students []gosuv2.StudentBasicResponse) {
 	if len(students) == 0 {
 		fmt.Println("No students found")
 	} else {
@@ -487,7 +550,7 @@ func outputStudentsDefault(students []gosuv2.StudentBasicResponse) {
 	}
 }
 
-func outputProfessorsDefault(professors []gosuv2.ProfessorBasicResponse) {
+func outputProfessorsText(professors []gosuv2.ProfessorBasicResponse) {
 	if len(professors) == 0 {
 		fmt.Println("No professors found")
 	} else {
@@ -537,4 +600,197 @@ func determineFinalStatus(grade gosuv2.SuvCurrentCourseGrades) string {
 			return "PENDING"
 		}
 	}
+}
+
+// Raw JSON output functions (no indentation for piping)
+func outputGradesRaw(grades []gosuv2.SuvCurrentCourseGrades) {
+	var gradeData []GradeData
+	for _, grade := range grades {
+		finalStatus := determineFinalStatus(grade)
+		data := GradeData{
+			CourseID:     grade.CourseID,
+			CourseName:   grade.CourseName,
+			Attempt:      grade.Attempt,
+			Average1:     grade.Average1,
+			Average2:     grade.Average2,
+			Average3:     grade.Average3,
+			Average4:     grade.Average4,
+			Average5:     grade.Average5,
+			Average6:     grade.Average6,
+			Substitute:   grade.Substitute,
+			Average:      grade.Average,
+			Postponed:    grade.Postponed,
+			FinalAverage: grade.FinalAverage,
+			Disabled:     grade.Disabled,
+			FinalStatus:  finalStatus,
+		}
+		gradeData = append(gradeData, data)
+	}
+
+	output, err := json.Marshal(gradeData)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error marshaling JSON: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(output))
+}
+
+func outputStudentsRaw(students []gosuv2.StudentBasicResponse) {
+	var studentData []StudentData
+	for _, student := range students {
+		data := StudentData{
+			StudentID:   student.StudentID,
+			StudentName: student.StudentName,
+			DNI:         student.DNI,
+		}
+		studentData = append(studentData, data)
+	}
+
+	output, err := json.Marshal(studentData)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error marshaling JSON: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(output))
+}
+
+func outputProfessorsRaw(professors []gosuv2.ProfessorBasicResponse) {
+	var professorData []ProfessorData
+	for _, professor := range professors {
+		data := ProfessorData{
+			Code:          professor.Code,
+			ProfessorName: professor.ProfessorName,
+			DNI:           professor.DNI,
+			WorkerID:      professor.WorkerID,
+		}
+		professorData = append(professorData, data)
+	}
+
+	output, err := json.Marshal(professorData)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error marshaling JSON: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(output))
+}
+
+// Generic table helper functions
+func printTableHeader(columns []Column) {
+	// Top border
+	fmt.Print("╭")
+	for i, col := range columns {
+		fmt.Print(strings.Repeat("─", col.Width))
+		if i < len(columns)-1 {
+			fmt.Print("┬")
+		}
+	}
+	fmt.Println("╮")
+
+	// Header row
+	fmt.Print("│")
+	for _, col := range columns {
+		padding := col.Width - len(col.Name)
+		if col.Align == "center" {
+			leftPad := padding / 2
+			rightPad := padding - leftPad
+			fmt.Printf("%s%s%s│", strings.Repeat(" ", leftPad), col.Name, strings.Repeat(" ", rightPad))
+		} else if col.Align == "right" {
+			fmt.Printf("%s%s │", strings.Repeat(" ", padding-1), col.Name)
+		} else { // left
+			fmt.Printf(" %-*s│", col.Width-1, col.Name)
+		}
+	}
+	fmt.Println()
+}
+
+func printTableSeparator(columns []Column) {
+	fmt.Print("├")
+	for i, col := range columns {
+		fmt.Print(strings.Repeat("─", col.Width))
+		if i < len(columns)-1 {
+			fmt.Print("┼")
+		}
+	}
+	fmt.Println("┤")
+}
+
+func printTableFooter(columns []Column) {
+	fmt.Print("╰")
+	for i, col := range columns {
+		fmt.Print(strings.Repeat("─", col.Width))
+		if i < len(columns)-1 {
+			fmt.Print("┴")
+		}
+	}
+	fmt.Println("╯")
+}
+
+func printStudentTableRow(student gosuv2.StudentBasicResponse, columns []Column) {
+	fmt.Print("│")
+
+	for _, col := range columns {
+		var content string
+
+		switch col.Name {
+		case "Student ID":
+			content = student.StudentID
+		case "Student Name":
+			content = student.StudentName
+		case "DNI":
+			content = student.DNI
+		}
+
+		// Apply formatting based on column alignment
+		padding := col.Width - len(content)
+		if col.Align == "center" {
+			leftPad := padding / 2
+			rightPad := padding - leftPad
+			fmt.Printf("%s%s%s│", strings.Repeat(" ", leftPad), content, strings.Repeat(" ", rightPad))
+		} else if col.Align == "right" {
+			fmt.Printf("%s%s │", strings.Repeat(" ", padding-1), content)
+		} else { // left
+			fmt.Printf(" %-*s│", col.Width-1, content)
+		}
+	}
+	fmt.Println()
+}
+
+func printProfessorTableRow(professor gosuv2.ProfessorBasicResponse, columns []Column) {
+	fmt.Print("│")
+
+	for _, col := range columns {
+		var content string
+
+		switch col.Name {
+		case "Code":
+			content = professor.Code
+		case "Professor Name":
+			content = professor.ProfessorName
+		case "DNI":
+			content = professor.DNI
+		case "Worker ID":
+			content = professor.WorkerID
+		}
+
+		// Apply formatting based on column alignment
+		padding := col.Width - len(content)
+		if col.Align == "center" {
+			leftPad := padding / 2
+			rightPad := padding - leftPad
+			fmt.Printf("%s%s%s│", strings.Repeat(" ", leftPad), content, strings.Repeat(" ", rightPad))
+		} else if col.Align == "right" {
+			fmt.Printf("%s%s │", strings.Repeat(" ", padding-1), content)
+		} else { // left
+			fmt.Printf(" %-*s│", col.Width-1, content)
+		}
+	}
+	fmt.Println()
+}
+
+// Helper function for max
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
