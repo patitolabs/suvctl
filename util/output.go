@@ -792,11 +792,3 @@ func printProfessorTableRow(professor gosuv2.ProfessorBasicResponse, columns []C
 	}
 	fmt.Println()
 }
-
-// Helper function for max
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
