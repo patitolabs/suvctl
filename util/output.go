@@ -23,12 +23,12 @@ const (
 func GetOutputFormat() OutputFormat {
 	format := viper.GetString("output")
 	switch format {
-	case "table":
-		return OutputTable
+	case "default":
+		return OutputDefault
 	case "json":
 		return OutputJSON
 	default:
-		return OutputDefault
+		return OutputTable
 	}
 }
 
@@ -143,44 +143,243 @@ func outputGradesTable(grades []gosuv2.SuvCurrentCourseGrades) {
 		return
 	}
 
-	// ASCII table header
-	fmt.Println("╭─────────┬────────────────────────────────────┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┬──────────┬─────────┬─────────┬──────────┬─────────────┬──────────╮")
-	fmt.Println("│ Course  │ Course Name                        │ Attempt │  Unit 1 │  Unit 2 │  Unit 3 │  Unit 4 │  Unit 5 │   Unit 6 │   Subst │  Failed │  Average │ Final Avg   │  Status  │")
-	fmt.Println("├─────────┼────────────────────────────────────┼─────────┼─────────┼─────────┼─────────┼─────────┼─────────┼──────────┼─────────┼─────────┼──────────┼─────────────┼──────────┤")
+	// Analyze which columns have data
+	columns := analyzeGradeColumns(grades)
+
+	// Build the table
+	printGradeTableHeader(columns)
+	printGradeTableSeparator(columns)
 
 	for _, grade := range grades {
-		finalStatus := determineFinalStatus(grade)
+		printGradeTableRow(grade, columns)
+	}
 
-		// Truncate course name if too long
-		courseName := grade.CourseName
-		if len(courseName) > 34 {
-			courseName = courseName[:31] + "..."
+	printGradeTableFooter(columns)
+}
+
+// Column represents a table column with its properties
+type Column struct {
+	Name    string
+	Width   int
+	Align   string // "left", "right", "center"
+	HasData bool
+}
+
+func analyzeGradeColumns(grades []gosuv2.SuvCurrentCourseGrades) []Column {
+	// Initialize all possible columns
+	columns := []Column{
+		{"Course", 9, "right", true},
+		{"Course Name", 36, "left", true},
+		{"Attempt", 9, "right", true},
+		{"Unit 1", 9, "right", false},
+		{"Unit 2", 9, "right", false},
+		{"Unit 3", 9, "right", false},
+		{"Unit 4", 9, "right", false},
+		{"Unit 5", 9, "right", false},
+		{"Unit 6", 9, "right", false},
+		{"Subst", 9, "right", false},
+		{"Failed", 9, "right", false},
+		{"Average", 9, "right", false},
+		{"Final Avg", 9, "right", false},
+		{"Status", 10, "center", true},
+	}
+
+	// Check which columns have data
+	for _, grade := range grades {
+		if grade.Average1 != 0 {
+			columns[3].HasData = true
 		}
-
-		fmt.Printf("│ %7d │ %-34s │ %7d │", grade.CourseID, courseName, grade.Attempt)
-
-		// Print averages with proper spacing
-		printTableGrade(grade.Average1)
-		printTableGrade(grade.Average2)
-		printTableGrade(grade.Average3)
-		printTableGrade(grade.Average4)
-		printTableGrade(grade.Average5)
-		printTableGrade(grade.Average6)
-		printTableGrade(grade.Substitute)
-		printTableGrade(grade.Postponed)
-		printTableGrade(grade.Average)
-		printTableGrade(grade.FinalAverage)
-
-		// Status with color
-		statusColor := getStatusColor(finalStatus)
-		fmt.Printf(" %s%-8s\033[0m │\n", statusColor, finalStatus)
-
-		if grade.Disabled {
-			fmt.Println("│         │ \033[31mWARNING: Student disqualified\033[0m       │         │         │         │         │         │         │          │         │         │          │             │          │")
+		if grade.Average2 != 0 {
+			columns[4].HasData = true
+		}
+		if grade.Average3 != 0 {
+			columns[5].HasData = true
+		}
+		if grade.Average4 != 0 {
+			columns[6].HasData = true
+		}
+		if grade.Average5 != 0 {
+			columns[7].HasData = true
+		}
+		if grade.Average6 != 0 {
+			columns[8].HasData = true
+		}
+		if grade.Substitute != 0 {
+			columns[9].HasData = true
+		}
+		if grade.Postponed != 0 {
+			columns[10].HasData = true
+		}
+		if grade.Average != 0 {
+			columns[11].HasData = true
+		}
+		if grade.FinalAverage != 0 {
+			columns[12].HasData = true
 		}
 	}
 
-	fmt.Println("╰─────────┴────────────────────────────────────┴─────────┴─────────┴─────────┴─────────┴─────────┴─────────┴──────────┴─────────┴─────────┴──────────┴─────────────┴──────────╯")
+	// Filter to only include columns with data
+	var activeColumns []Column
+	for _, col := range columns {
+		if col.HasData {
+			activeColumns = append(activeColumns, col)
+		}
+	}
+
+	return activeColumns
+}
+
+func printGradeTableHeader(columns []Column) {
+	// Top border
+	fmt.Print("╭")
+	for i, col := range columns {
+		fmt.Print(strings.Repeat("─", col.Width))
+		if i < len(columns)-1 {
+			fmt.Print("┬")
+		}
+	}
+	fmt.Println("╮")
+
+	// Header row
+	fmt.Print("│")
+	for _, col := range columns {
+		padding := col.Width - len(col.Name)
+		if col.Align == "center" {
+			leftPad := padding / 2
+			rightPad := padding - leftPad
+			fmt.Printf("%s%s%s│", strings.Repeat(" ", leftPad), col.Name, strings.Repeat(" ", rightPad))
+		} else if col.Align == "right" {
+			fmt.Printf("%s%s │", strings.Repeat(" ", padding-1), col.Name)
+		} else { // left
+			fmt.Printf(" %-*s│", col.Width-1, col.Name)
+		}
+	}
+	fmt.Println()
+}
+
+func printGradeTableSeparator(columns []Column) {
+	fmt.Print("├")
+	for i, col := range columns {
+		fmt.Print(strings.Repeat("─", col.Width))
+		if i < len(columns)-1 {
+			fmt.Print("┼")
+		}
+	}
+	fmt.Println("┤")
+}
+
+func printGradeTableFooter(columns []Column) {
+	fmt.Print("╰")
+	for i, col := range columns {
+		fmt.Print(strings.Repeat("─", col.Width))
+		if i < len(columns)-1 {
+			fmt.Print("┴")
+		}
+	}
+	fmt.Println("╯")
+}
+
+func printGradeTableRow(grade gosuv2.SuvCurrentCourseGrades, columns []Column) {
+	finalStatus := determineFinalStatus(grade)
+
+	// Truncate course name if too long
+	courseName := grade.CourseName
+	maxNameLen := 34 // Account for padding
+	if len(courseName) > maxNameLen {
+		courseName = courseName[:maxNameLen-3] + "..."
+	}
+
+	fmt.Print("│")
+
+	for _, col := range columns {
+		var content string
+		var useColor bool
+		var colorCode string
+
+		switch col.Name {
+		case "Course":
+			content = fmt.Sprintf("%d", grade.CourseID)
+		case "Course Name":
+			content = courseName
+		case "Attempt":
+			content = fmt.Sprintf("%d", grade.Attempt)
+		case "Unit 1":
+			content, useColor, colorCode = formatGradeValue(grade.Average1)
+		case "Unit 2":
+			content, useColor, colorCode = formatGradeValue(grade.Average2)
+		case "Unit 3":
+			content, useColor, colorCode = formatGradeValue(grade.Average3)
+		case "Unit 4":
+			content, useColor, colorCode = formatGradeValue(grade.Average4)
+		case "Unit 5":
+			content, useColor, colorCode = formatGradeValue(grade.Average5)
+		case "Unit 6":
+			content, useColor, colorCode = formatGradeValue(grade.Average6)
+		case "Subst":
+			content, useColor, colorCode = formatGradeValue(grade.Substitute)
+		case "Failed":
+			content, useColor, colorCode = formatGradeValue(grade.Postponed)
+		case "Average":
+			content, useColor, colorCode = formatGradeValue(grade.Average)
+		case "Final Avg":
+			content, useColor, colorCode = formatGradeValue(grade.FinalAverage)
+		case "Status":
+			content = finalStatus
+			useColor = true
+			colorCode = getStatusColor(finalStatus)
+		}
+
+		// Apply formatting based on column alignment
+		padding := col.Width - len(content)
+		if useColor {
+			if col.Align == "center" {
+				leftPad := padding / 2
+				rightPad := padding - leftPad
+				fmt.Printf("%s%s%s%s\033[0m│", strings.Repeat(" ", leftPad), colorCode, content, strings.Repeat(" ", rightPad))
+			} else if col.Align == "right" {
+				fmt.Printf("%s%s%s\033[0m │", strings.Repeat(" ", padding-1), colorCode, content)
+			} else { // left
+				fmt.Printf(" %s%s\033[0m%s│", colorCode, content, strings.Repeat(" ", padding-1))
+			}
+		} else {
+			if col.Align == "center" {
+				leftPad := padding / 2
+				rightPad := padding - leftPad
+				fmt.Printf("%s%s%s│", strings.Repeat(" ", leftPad), content, strings.Repeat(" ", rightPad))
+			} else if col.Align == "right" {
+				fmt.Printf("%s%s │", strings.Repeat(" ", padding-1), content)
+			} else { // left
+				fmt.Printf(" %-*s│", col.Width-1, content)
+			}
+		}
+	}
+	fmt.Println()
+
+	// Show warning for disqualified students
+	if grade.Disabled {
+		fmt.Print("│")
+		for i, col := range columns {
+			if i == 1 { // Course Name column
+				warning := "\033[31mWARNING: Student disqualified\033[0m"
+				fmt.Printf(" %-*s│", col.Width-1, warning)
+			} else {
+				fmt.Printf("%s│", strings.Repeat(" ", col.Width))
+			}
+		}
+		fmt.Println()
+	}
+}
+
+func formatGradeValue(grade float32) (string, bool, string) {
+	if grade == 0 {
+		return "-", false, ""
+	}
+
+	content := fmt.Sprintf("%.2f", grade)
+	useColor := true
+	colorCode := getGradeColor(grade)
+
+	return content, useColor, colorCode
 }
 
 func outputStudentsJSON(students []gosuv2.StudentBasicResponse) {
@@ -304,15 +503,6 @@ func outputProfessorsDefault(professors []gosuv2.ProfessorBasicResponse) {
 }
 
 // Helper functions
-func printTableGrade(grade float32) {
-	if grade != 0 {
-		color := getGradeColor(grade)
-		fmt.Printf(" %s%7.2f\033[0m │", color, grade)
-	} else {
-		fmt.Printf("    -    │")
-	}
-}
-
 func getGradeColor(grade float32) string {
 	if grade < 13.5 {
 		return "\033[31m" // Red

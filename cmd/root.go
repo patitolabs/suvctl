@@ -20,14 +20,14 @@ var (
 		Long: `suvctl is a command-line tool for interacting with SUV2 at National University of Trujillo.
 
 Output Formats:
-  --output default  Standard text output with colors (default)
-  --output table    Fancy ASCII table format
+  --output default  Standard text output with colors
+  --output table    Fancy ASCII table format (default)
   --output json     Raw JSON format
 
 Examples:
-  suvctl grades --output table
+  suvctl grades
   suvctl search --code 123456 --output json
-  suvctl grades --course "Math" --output table`,
+  suvctl grades --course "Math" --output default`,
 	}
 
 	c       *util.Client
@@ -47,7 +47,7 @@ func init() {
 	rootCmd.PersistentFlags().StringP("session", "S", "", "session for SUV operations")
 	rootCmd.PersistentFlags().BoolP("detailed", "d", false, "show detailed information")
 	rootCmd.PersistentFlags().BoolP("version", "v", false, "show version information")
-	rootCmd.PersistentFlags().StringP("output", "o", "default", "output format (default, table, json)")
+	rootCmd.PersistentFlags().StringP("output", "o", "table", "output format (default, table, json)")
 
 	viper.BindPFlag("url", rootCmd.PersistentFlags().Lookup("url"))
 	viper.BindPFlag("session", rootCmd.PersistentFlags().Lookup("session"))
