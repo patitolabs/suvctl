@@ -24,9 +24,14 @@ func (c *Client) ListGradesByCourseId(courseId []string) {
 	suvGradesResponse, err := c.SuvClient.GetSuvGradesResponse()
 	cobra.CheckErr(err)
 
-	courseIdMap := make(map[string]struct{})
+	courseIdMap := make(map[int]struct{})
 	for _, id := range courseId {
-		courseIdMap[id] = struct{}{}
+		courseIdInt, err := strconv.Atoi(id)
+		if err != nil {
+			fmt.Printf("Invalid course ID: %s\n", id)
+			continue
+		}
+		courseIdMap[courseIdInt] = struct{}{}
 	}
 
 	found := false
@@ -81,46 +86,40 @@ func prettyPrintGradeCourse(grade gosuv2.SuvCurrentCourseGrades) {
 	printAverage(grade.Aplazado, "Failed:")
 	printAverage(grade.PromedioFinal, "Course Final Average:")
 
-	if grade.Inhabilitado != "0" {
+	if grade.Inhabilitado {
 		fmt.Println("\033[31mWarning: the student was disqualified in this course\033[0m")
 	}
 
 	printFinalStatus(grade)
 }
 
-func printAverage(gradeStr string, message string) {
-	if gradeStr != "" {
-		parseAndPrintGrade(gradeStr, message)
+func printAverage(grade float32, message string) {
+	if grade != 0 {
+		printGrade(grade, message)
 	}
 }
 
-func printFinalStatus(grade gosuv2.SuvCurrentCourseGrades) {
-	if grade.EstadoFinal == "1" {
-		// Print the final status in green
-		fmt.Println("Final status: \033[32mPASSED\033[0m")
-	} else {
-		if grade.Promedio1 != "" && grade.Promedio2 != "" && grade.Promedio3 != "" {
-			// Print the final status in red
-			fmt.Println("Final status: \033[31mFAILED\033[0m")
-		} else {
-			// Print the final status in yellow, semester isn't over yet
-			fmt.Println("Final status: \033[33mPENDING\033[0m")
-		}
-	}
-}
-
-func parseAndPrintGrade(gradeStr string, message string) {
-	grade, err := strconv.ParseFloat(gradeStr, 32)
-	if err != nil {
-		fmt.Println("Error parsing grade:", err)
-		return
-	}
-
+func printGrade(grade float32, message string) {
 	// If grade < 13.5 print the message in the default color, and the number in red
 	// Else, print the message in the default color, and the number in light blue
 	if grade < 13.5 {
 		fmt.Printf("%s \033[31m%.2f\033[0m\n", message, grade)
 	} else {
 		fmt.Printf("%s \033[94m%.2f\033[0m\n", message, grade)
+	}
+}
+
+func printFinalStatus(grade gosuv2.SuvCurrentCourseGrades) {
+	if grade.EstadoFinal == 1 {
+		// Print the final status in green
+		fmt.Println("Final status: \033[32mPASSED\033[0m")
+	} else {
+		if grade.Promedio1 != 0 && grade.Promedio2 != 0 && grade.Promedio3 != 0 {
+			// Print the final status in red
+			fmt.Println("Final status: \033[31mFAILED\033[0m")
+		} else {
+			// Print the final status in yellow, semester isn't over yet
+			fmt.Println("Final status: \033[33mPENDING\033[0m")
+		}
 	}
 }
