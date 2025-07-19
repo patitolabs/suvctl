@@ -253,13 +253,14 @@ func printGradeTableHeader(columns []Column) {
 	fmt.Print("│")
 	for _, col := range columns {
 		padding := col.Width - len(col.Name)
-		if col.Align == "center" {
+		switch col.Align {
+		case "center":
 			leftPad := padding / 2
 			rightPad := padding - leftPad
 			fmt.Printf("%s%s%s│", strings.Repeat(" ", leftPad), col.Name, strings.Repeat(" ", rightPad))
-		} else if col.Align == "right" {
+		case "right":
 			fmt.Printf("%s%s │", strings.Repeat(" ", padding-1), col.Name)
-		} else { // left
+		default: // left
 			fmt.Printf(" %-*s│", col.Width-1, col.Name)
 		}
 	}
@@ -341,23 +342,25 @@ func printGradeTableRow(grade gosuv2.SuvCurrentCourseGrades, columns []Column) {
 		// Apply formatting based on column alignment
 		padding := col.Width - len(content)
 		if useColor {
-			if col.Align == "center" {
+			switch col.Align {
+			case "center":
 				leftPad := padding / 2
 				rightPad := padding - leftPad
 				fmt.Printf("%s%s%s%s\033[0m│", strings.Repeat(" ", leftPad), colorCode, content, strings.Repeat(" ", rightPad))
-			} else if col.Align == "right" {
+			case "right":
 				fmt.Printf("%s%s%s\033[0m │", strings.Repeat(" ", padding-1), colorCode, content)
-			} else { // left
+			default: // left
 				fmt.Printf(" %s%s\033[0m%s│", colorCode, content, strings.Repeat(" ", padding-1))
 			}
 		} else {
-			if col.Align == "center" {
+			switch col.Align {
+			case "center":
 				leftPad := padding / 2
 				rightPad := padding - leftPad
 				fmt.Printf("%s%s%s│", strings.Repeat(" ", leftPad), content, strings.Repeat(" ", rightPad))
-			} else if col.Align == "right" {
+			case "right":
 				fmt.Printf("%s%s │", strings.Repeat(" ", padding-1), content)
-			} else { // left
+			default: // left
 				fmt.Printf(" %-*s│", col.Width-1, content)
 			}
 		}
@@ -690,13 +693,14 @@ func printTableHeader(columns []Column) {
 	fmt.Print("│")
 	for _, col := range columns {
 		padding := col.Width - len(col.Name)
-		if col.Align == "center" {
+		switch col.Align {
+		case "center":
 			leftPad := padding / 2
 			rightPad := padding - leftPad
 			fmt.Printf("%s%s%s│", strings.Repeat(" ", leftPad), col.Name, strings.Repeat(" ", rightPad))
-		} else if col.Align == "right" {
+		case "right":
 			fmt.Printf("%s%s │", strings.Repeat(" ", padding-1), col.Name)
-		} else { // left
+		default: // left
 			fmt.Printf(" %-*s│", col.Width-1, col.Name)
 		}
 	}
@@ -742,13 +746,14 @@ func printStudentTableRow(student gosuv2.StudentBasicResponse, columns []Column)
 
 		// Apply formatting based on column alignment
 		padding := col.Width - len(content)
-		if col.Align == "center" {
+		switch col.Align {
+		case "center":
 			leftPad := padding / 2
 			rightPad := padding - leftPad
 			fmt.Printf("%s%s%s│", strings.Repeat(" ", leftPad), content, strings.Repeat(" ", rightPad))
-		} else if col.Align == "right" {
+		case "right":
 			fmt.Printf("%s%s │", strings.Repeat(" ", padding-1), content)
-		} else { // left
+		default: // left
 			fmt.Printf(" %-*s│", col.Width-1, content)
 		}
 	}
@@ -774,13 +779,14 @@ func printProfessorTableRow(professor gosuv2.ProfessorBasicResponse, columns []C
 
 		// Apply formatting based on column alignment
 		padding := col.Width - len(content)
-		if col.Align == "center" {
+		switch col.Align {
+		case "center":
 			leftPad := padding / 2
 			rightPad := padding - leftPad
 			fmt.Printf("%s%s%s│", strings.Repeat(" ", leftPad), content, strings.Repeat(" ", rightPad))
-		} else if col.Align == "right" {
+		case "right":
 			fmt.Printf("%s%s │", strings.Repeat(" ", padding-1), content)
-		} else { // left
+		default: // left
 			fmt.Printf(" %-*s│", col.Width-1, content)
 		}
 	}
