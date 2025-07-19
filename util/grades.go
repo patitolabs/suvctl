@@ -36,7 +36,7 @@ func (c *Client) ListGradesByCourseId(courseId []string) {
 
 	found := false
 	for _, grade := range suvGradesResponse.Courses {
-		if _, exists := courseIdMap[grade.IdCurso]; exists {
+		if _, exists := courseIdMap[grade.CourseID]; exists {
 			prettyPrintGradeCourse(grade)
 			fmt.Println()
 			found = true
@@ -56,7 +56,7 @@ func (c *Client) ListGradesByCourseName(courseName []string) {
 	found := false
 	for _, grade := range suvGradesResponse.Courses {
 		for _, name := range courseName {
-			if strings.Contains(grade.Curso, name) {
+			if strings.Contains(grade.CourseName, name) {
 				prettyPrintGradeCourse(grade)
 				fmt.Println()
 				found = true
@@ -72,21 +72,21 @@ func (c *Client) ListGradesByCourseName(courseName []string) {
 }
 
 func prettyPrintGradeCourse(grade gosuv2.SuvCurrentCourseGrades) {
-	fmt.Println("Course ID:", grade.IdCurso)
-	fmt.Println("Course:", grade.Curso)
-	fmt.Println("Time:", grade.Vez)
-	printAverage(grade.Promedio1, "Average of Unit 1:")
-	printAverage(grade.Promedio2, "Average of Unit 2:")
-	printAverage(grade.Promedio3, "Average of Unit 3:")
-	printAverage(grade.Promedio4, "Average of Unit 4:")
-	printAverage(grade.Promedio5, "Average of Unit 5:")
-	printAverage(grade.Promedio6, "Average of Unit 6:")
-	printAverage(grade.Sustitutorio, "Substitute exam:")
-	printAverage(grade.Promedio, "Course Average:")
-	printAverage(grade.Aplazado, "Failed:")
-	printAverage(grade.PromedioFinal, "Course Final Average:")
+	fmt.Println("Course ID:", grade.CourseID)
+	fmt.Println("Course:", grade.CourseName)
+	fmt.Println("Time:", grade.Attempt)
+	printAverage(grade.Average1, "Average of Unit 1:")
+	printAverage(grade.Average2, "Average of Unit 2:")
+	printAverage(grade.Average3, "Average of Unit 3:")
+	printAverage(grade.Average4, "Average of Unit 4:")
+	printAverage(grade.Average5, "Average of Unit 5:")
+	printAverage(grade.Average6, "Average of Unit 6:")
+	printAverage(grade.Substitute, "Substitute exam:")
+	printAverage(grade.Average, "Course Average:")
+	printAverage(grade.Postponed, "Failed:")
+	printAverage(grade.FinalAverage, "Course Final Average:")
 
-	if grade.Inhabilitado {
+	if grade.Disabled {
 		fmt.Println("\033[31mWarning: the student was disqualified in this course\033[0m")
 	}
 
@@ -110,11 +110,11 @@ func printGrade(grade float32, message string) {
 }
 
 func printFinalStatus(grade gosuv2.SuvCurrentCourseGrades) {
-	if grade.EstadoFinal == 1 {
+	if grade.FinalStatus == 1 {
 		// Print the final status in green
 		fmt.Println("Final status: \033[32mPASSED\033[0m")
 	} else {
-		if grade.Promedio1 != 0 && grade.Promedio2 != 0 && grade.Promedio3 != 0 {
+		if grade.Average1 != 0 && grade.Average2 != 0 && grade.Average3 != 0 {
 			// Print the final status in red
 			fmt.Println("Final status: \033[31mFAILED\033[0m")
 		} else {

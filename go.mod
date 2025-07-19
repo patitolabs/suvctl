@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/adrg/xdg v0.5.3
-	github.com/patitolabs/gosuv2 v0.0.6-alpha
+	github.com/patitolabs/gosuv2 v0.0.7-alpha
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
 )

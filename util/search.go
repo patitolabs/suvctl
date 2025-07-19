@@ -40,9 +40,9 @@ func (c *Client) printSearchStudentResponse(students []gosuv2.StudentBasicRespon
 		fmt.Println("Students found:")
 		for _, student := range students {
 			fmt.Println()
-			fmt.Println("Code:", student.IdAlumno)
-			fmt.Println("Name:", student.Alumno)
-			fmt.Println("DNI:", student.Dni)
+			fmt.Println("Code:", student.StudentID)
+			fmt.Println("Name:", student.StudentName)
+			fmt.Println("DNI:", student.DNI)
 		}
 	}
 }
@@ -54,10 +54,10 @@ func (c *Client) parseSearchProfessorResponse(professors []gosuv2.ProfessorBasic
 		fmt.Println("Professors found:")
 		for _, professor := range professors {
 			fmt.Println()
-			fmt.Println("Code:", professor.Codigo)
-			fmt.Println("Name:", professor.Docente)
-			fmt.Println("DNI:", professor.Dni)
-			fmt.Println("Worker ID:", professor.IdTrabajador)
+			fmt.Println("Code:", professor.Code)
+			fmt.Println("Name:", professor.ProfessorName)
+			fmt.Println("DNI:", professor.DNI)
+			fmt.Println("Worker ID:", professor.WorkerID)
 		}
 	}
 }
