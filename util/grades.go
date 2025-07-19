@@ -14,10 +14,7 @@ func (c *Client) ListGrades() {
 	suvGradesResponse, err := c.SuvClient.GetSuvGradesResponse()
 	cobra.CheckErr(err)
 
-	for _, grade := range suvGradesResponse.Courses {
-		prettyPrintGradeCourse(grade)
-		fmt.Println()
-	}
+	OutputGrades(suvGradesResponse.Courses)
 }
 
 func (c *Client) ListGradesByCourseId(courseId []string) {
@@ -35,10 +32,10 @@ func (c *Client) ListGradesByCourseId(courseId []string) {
 	}
 
 	found := false
+	var foundGrades []gosuv2.SuvCurrentCourseGrades
 	for _, grade := range suvGradesResponse.Courses {
 		if _, exists := courseIdMap[grade.CourseID]; exists {
-			prettyPrintGradeCourse(grade)
-			fmt.Println()
+			foundGrades = append(foundGrades, grade)
 			found = true
 		}
 	}
@@ -47,6 +44,8 @@ func (c *Client) ListGradesByCourseId(courseId []string) {
 		fmt.Println("No courses found.")
 		os.Exit(1)
 	}
+
+	OutputGrades(foundGrades)
 }
 
 func (c *Client) ListGradesByCourseName(courseName []string) {
@@ -54,11 +53,11 @@ func (c *Client) ListGradesByCourseName(courseName []string) {
 	cobra.CheckErr(err)
 
 	found := false
+	var foundGrades []gosuv2.SuvCurrentCourseGrades
 	for _, grade := range suvGradesResponse.Courses {
 		for _, name := range courseName {
 			if strings.Contains(grade.CourseName, name) {
-				prettyPrintGradeCourse(grade)
-				fmt.Println()
+				foundGrades = append(foundGrades, grade)
 				found = true
 				break
 			}
@@ -69,6 +68,8 @@ func (c *Client) ListGradesByCourseName(courseName []string) {
 		fmt.Println("No courses found.")
 		os.Exit(1)
 	}
+
+	OutputGrades(foundGrades)
 }
 
 func prettyPrintGradeCourse(grade gosuv2.SuvCurrentCourseGrades) {

@@ -17,6 +17,17 @@ var (
 	rootCmd = &cobra.Command{
 		Use:   "suvctl",
 		Short: "A command-line tool for SUV2 at National University of Trujillo",
+		Long: `suvctl is a command-line tool for interacting with SUV2 at National University of Trujillo.
+
+Output Formats:
+  --output default  Standard text output with colors (default)
+  --output table    Fancy ASCII table format
+  --output json     Raw JSON format
+
+Examples:
+  suvctl grades --output table
+  suvctl search --code 123456 --output json
+  suvctl grades --course "Math" --output table`,
 	}
 
 	c       *util.Client
@@ -36,11 +47,13 @@ func init() {
 	rootCmd.PersistentFlags().StringP("session", "S", "", "session for SUV operations")
 	rootCmd.PersistentFlags().BoolP("detailed", "d", false, "show detailed information")
 	rootCmd.PersistentFlags().BoolP("version", "v", false, "show version information")
+	rootCmd.PersistentFlags().StringP("output", "o", "default", "output format (default, table, json)")
 
 	viper.BindPFlag("url", rootCmd.PersistentFlags().Lookup("url"))
 	viper.BindPFlag("session", rootCmd.PersistentFlags().Lookup("session"))
 	viper.BindPFlag("detailed", rootCmd.PersistentFlags().Lookup("detailed"))
 	viper.BindPFlag("version", rootCmd.PersistentFlags().Lookup("version"))
+	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 }
 
 func initConfig() {
