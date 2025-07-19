@@ -31,7 +31,9 @@ builds:
       - v3
 
 archives:
-  - format: zip
+  - formats:
+      - tar.gz
+      - zip
     files:
       - LICENSE*
       - CHANGELOG*
@@ -47,20 +49,19 @@ nfpms:
     package_name: suvctl
     vendor: PatitoLabs
     license: MIT
-    maintainer: Nícolas Castillo <ncastillo@patito.digital>
+    maintainer: Nícolas Castillo <tecncr@proton.me>
     description: A command-line tool for SUV2 at National University of Trujillo
     homepage: https://github.com/patitolabs/suvctl
     formats:
       - deb
       - rpm
       - apk
-      - termux.deb
       - archlinux
     rpm:
       summary: A command-line tool for SUV2 at National University of Trujillo
       compression: lzma
     archlinux:
       pkgbase: suvctl
-      packager: Nícolas Castillo <ncastillo@patito.digital>
+      packager: Nícolas Castillo <tecncr@proton.me>
     provides:
       - suvctl
